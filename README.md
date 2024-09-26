@@ -1,113 +1,76 @@
-## Student Management  ##
+School Management :
 
-## Using Comments:
+using comments:
 
-Step 1 : Table Creates Comment:
+1. composer require tymon/jwt-auth  
+2. php artisan make:seeder AdminSeeder  
+3. php artisan make:middleware RoleMiddleware
+4. php artisan make:controller StudentController
+5. php artisan make:controller TeacherController
+6. php artisan db:seed
+7. php artisan make:migration create_students_table
+8. php artisan make:migration create_s\teachers_table
+9. php artisan make:migration create_s\marks_table
+10. php artisan make:migration create_s\homeworks_table
+11. php artisan make:middleware CheckGuard
+12. php artisan migrate 
 
-<!-- 1. php artisan make:seeder DepartmentSeeder. -->
+Api integration:
+ 
+jquery ajax using json format.
 
-<!-- DepartmentSeeder.php -->
+public/js/ teacher.js,student.js,homework.js,mark.js
 
- public function run(): void
+Role Check auth.php
+
+  'guards' => [
+            'web' => [
+                'driver' => 'session',
+                'provider' => 'users',
+            ],
+            'teacher' => [
+            'driver' => 'session',
+            'provider' => 'teachers',
+        ],
+        'student' => [
+            'driver' => 'session',
+            'provider' => 'students',
+        ],
+        ],
+
+'providers' => [
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User::class,
+        ],
+        'teachers' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Teacher::class,
+        ],
+        'students' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Student::class,
+        ],
+    ],
+
+Admin login:
+
+AdminSeeder.php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+
+class AdminSeeder extends Seeder
+{
+    public function run()
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        DB::table('departments')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        
-        DB::table('departments')->insert([
-            ['name' => 'Mechanical'],
-            ['name' => 'Computer'],
-            ['name' => 'ECE'],
-            ['name' => 'EEE'],
-            ['name' => 'AI'],
+        User::create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('admin@1234'),
         ]);
     }
-
-    run the comment :
-    php artisan db:seed --class=DepartmentSeeder
-
-
-<!-- 2. Department table : -->
-
-    php artisan make:migration create_departments_table --create=departments
-
-    Schema::create('departments', function (Blueprint $table) {
-                $table->id(); 
-                $table->string('name');
-                $table->timestamps();
-            });
-
-    run the comment :
-    php artisan migrate
-
-<!-- 2. Student table : -->
-
-php artisan make:migration create_students_table
-
-    Schema::create('students', function (Blueprint $table) {
-            $table->id();
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->string('mobile');
-            $table->string('email')->unique();
-            $table->text('address');
-            $table->unsignedBigInteger('department_id');  // Foreign key
-        
-            // Foreign key constraint: Ensure `department_id` references `departments.id`
-            $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
-        
-            $table->tinyInteger('status')->default(1);
-            $table->timestamps();
-        });
-
-    run the comment :
-    php artisan migrate
-
- <!-- 3. Middleware Role Setup Student  -->
-
-    php artisan make:middleware CheckStudent
-
-<!-- CheckStudent.php -->
-
-            public function handle(Request $request, Closure $next)
-            {
-                if (Auth::check() && Auth::user()->role == 'student') {
-                    return $next($request);                      
-                    }
-
-                return redirect('/')->with('error', 'You do not have student access.');
-            }
-
-<!-- kernel.php: -->
-
-         protected $routeMiddleware = [
-        'student' => \App\Http\Middleware\CheckStudent::class,
-    ];
-
-<!-- 2.Routes  -->
-
- <!-- web.php -->
-
-Auth::routes();
-
-Route::group(['middleware' => 'guest'], function(){
-Route::post('/login', 'LoginController@login_auth');
-Route::post('/signup', 'LoginController@signup');
-
-});
-
-Route::get('/', 'LoginController@showLoginForm');
-
-Route::get('/signupform', 'LoginController@signupform');
-
-Route::middleware(['auth', 'student'])->group(function () {
-    Route::get('/student', 'StudentController@student')->name('student');
-
-    // Request:
-    Route::post('/student-add', 'StudentController@student_add');
-    Route::post('/student-update/{id}', 'StudentController@student_update');
-    Route::post('/student-delete', 'StudentController@student_delete');
-    Route::get('/student-get', 'StudentController@student_get');
-Route::get('/logout', 'LoginController@logout');
-    
-});
+}
