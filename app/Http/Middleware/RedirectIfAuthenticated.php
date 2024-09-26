@@ -13,25 +13,16 @@ class RedirectIfAuthenticated
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    // public function handle(Request $request, Closure $next, string ...$guards): Response
-    // {
-    //     $guards = empty($guards) ? [null] : $guards;
-
-    //     foreach ($guards as $guard) {
-    //         if (Auth::guard($guard)->check()) {
-    //             return redirect(RouteServiceProvider::HOME);
-    //         }
-    //     }
-
-    //     return $next($request);
-    // }
-    public function handle(Request $request, Closure $next, string ...$guards): Response
+    public function handle(Request $request, Closure $next,$guard)
     {
-        if (Auth::guard('web')->check()) 
-        {
-            return redirect()->url('student');
+        // If the user is authenticated, redirect them to the dashboard
+        if (Auth::guard($guard)->check()) {
+            return redirect()->url('dashboard'); // Adjust to your login route
+
         }
 
         return $next($request);

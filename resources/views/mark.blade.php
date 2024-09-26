@@ -15,15 +15,17 @@ $title = 'students';
     <div class="main_head1 d-flex">
         <p class="page_heading">Student Details</p>
 
-        <button class="create_btn ms-auto add_student_btn">Add New
+        <button class="create_btn ms-auto add_mark_btn">Add New
             Student</button>
     </div>
 
     <table class="table" id="datatable">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Email</th>
+                <th>Student Name</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Due Date</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -32,49 +34,61 @@ $title = 'students';
         </tbody>
     </table>
 
-    <div class="modal " id="add_student" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    <div class="modal " id="add_mark" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="false">
         <div class="modal-dialog student-dialog modal-l">
             <div class="modal-content">
-                <p class="student_add_title">Add student Details</p>
+                <p class="student_add_title">Add mark Details</p>
 
                 <div class="modal-header">
 
                 </div>
 
                 <div class="modal-body">
-                    <form id="student_add_form">
+                    <form id="mark_add_form">
                         <div class="student_add_main">
                             <div class="row">
                                 <div class="col col-md-12 mt-4">
-                                    <div class="form-floating text-center w-100">
-                                        <input type="text" class="form-control" id="name" placeholder="Teacher Name"
-                                            name="name">
-                                        <label for="name">Teacher Name</label>
-                                        <div class="error-message" id="name_error"></div>
-
-                                    </div>
+                                    <select name="student_id" class="form-control" id="student_id">
+                                        <option value="">Select Student</option>
+                                        @foreach($students as $student)
+                                        <option value="{{ $student->id }}">{{ $student->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="error-message" id="student_id_error"></div>
                                 </div>
 
 
 
                                 <div class="col col-md-12 mt-4">
                                     <div class="form-floating text-center w-100">
-                                        <input type="text" class="form-control" id="email" placeholder="" name="email">
-                                        <label for="email">Email</label>
-                                        <div class="error-message" id="email_error"></div>
+                                        <input type="number" class="form-control" id="marks" placeholder=""
+                                            name="marks">
+                                        <label for="marks">Marks</label>
+                                        <div class="error-message" id="marks_error"></div>
 
                                     </div>
                                 </div>
 
                                 <div class="col col-md-12 mt-4">
-                                    <div class="form-floating text-center password_group w-100">
-                                        <input type="password" class="form-control" id="password" placeholder=""
-                                            name="password">
-                                        <label for="password">Password</label>
-                                        <div class="error-message" id="password_error"></div>
+                                    <div class="form-floating text-center w-100">
+                                        <input type="text" class="form-control" id="subject" placeholder=""
+                                            name="subject">
+                                        <label for="subject">subject</label>
+                                        <div class="error-message" id="subject_error"></div>
 
                                     </div>
+                                </div>
+
+
+                                <div class="col col-md-12 mt-4">
+                                    <div class="form-floating text-center w-100">
+                                        <input type="date" class="form-control" id="date" placeholder="" name="date">
+                                        <label for="date">Date</label>
+                                        <div class="error-message" id="date_error"></div>
+
+                                    </div>
+
                                 </div>
 
                             </div>
@@ -103,6 +117,6 @@ $title = 'students';
 
 @section('custom_scripts')
 
-<script src="{{asset('js/student.js') }}"></script>
+<script src="{{asset('js/mark.js') }}"></script>
 
 @endsection

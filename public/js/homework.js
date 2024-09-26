@@ -2,33 +2,33 @@ $(document).ready(function () {
     var mode, id, coreJSON;
     var currentPage = 0;
     // ***************************[Get] ********************************************************************
-    Getteacher();
+    // Gethomework();
 
-    function Getteacher() {
+    function Gethomework() {
 
         $.ajax({
-            url: baseUrl + "/teacher-get",
+            url: baseUrl + "/homework-get",
             type: "GET",
             dataType: "json",
             success: function (response) {
-                disteacher(response);
-                coreJSON = response.teacherdetails;
+                dishomework(response);
+                coreJSON = response.homeworkdetails;
                 console.log(coreJSON);
             },
             error: function (xhr, status, error) {
-                console.error("Error fetching teacher details:", error);
+                console.error("Error fetching homework details:", error);
             },
         });
     }
 
-    function disteacher(data) {
+    function dishomework(data) {
         if ($.fn.DataTable.isDataTable("#datatable")) {
             $('#datatable').DataTable().clear().destroy();
         }
 
         var table = $("#datatable").dataTable({
             aaSorting: [],
-            aaData: data.teacherdetails,
+            aaData: data.homeworkdetails,
             aoColumns: [
                 {
                     mData: function (data, type, full, meta) {
@@ -61,21 +61,21 @@ $(document).ready(function () {
 
     function refreshDetails() {
         currentPage = $('#datatable').DataTable().page(); // Capture the current page number
-        $.when(Getteacher()).done(function () {
+        $.when(Gethomework()).done(function () {
             var table = $('#datatable').DataTable();
             table.destroy();
-            disteacher(coreJSON);
+            dishomework(coreJSON);
         });
     }
 
     // ***************************[Add] ********************************************************************
 
-    $(".add_teacher_btn").click(function () {
+    $(".add_homework_btn").click(function () {
         mode = "new";
-        $("#add_teacher").modal("show");
+        $("#add_homework").modal("show");
     });
 
-    $("#add_teacher").on("show.bs.modal", function () {
+    $("#add_homework").on("show.bs.modal", function () {
         $(this).find("form").trigger("reset");
         $(".form-control").removeClass("danger-border success-border");
         $(".error-message").html("");
@@ -85,13 +85,13 @@ $(document).ready(function () {
 
 
 
-    $("#teacher_add_form input").on("keyup", function () {
+    $("#homework_add_form input").on("keyup", function () {
         validateField($(this));
     });
 
     // Form submission
 
-    $("#teacher_add_form").on("submit", function (e) {
+    $("#homework_add_form").on("submit", function (e) {
         e.preventDefault();
 
         var form = $(this);
@@ -99,20 +99,24 @@ $(document).ready(function () {
         var firstInvalidField = null;
 
         // Validate all fields
-        if (!validateField($("#name"))) {
+        if (!validateField($("#student_id"))) {
             isValid = false;
-            firstInvalidField = $("#name");
-        } else if (!validateField($("#email"))) {
-            isValid = false;
-            if (firstInvalidField === null)
-                firstInvalidField = $("#email");
-        }
-        else if (!validateField($("#password")) && mode != 'update') {
+            firstInvalidField = $("#student_id");
+        } else if (!validateField($("#title"))) {
             isValid = false;
             if (firstInvalidField === null)
-                firstInvalidField = $("#password");
+                firstInvalidField = $("#title");
         }
-
+        else if (!validateField($("#description"))) {
+            isValid = false;
+            if (firstInvalidField === null)
+                firstInvalidField = $("#description");
+        }
+        else if (!validateField($("#due_date"))) {
+            isValid = false;
+            if (firstInvalidField === null)
+                firstInvalidField = $("#due_date");
+        }
 
         if (isValid) {
             var formData = new FormData(this);
@@ -120,15 +124,13 @@ $(document).ready(function () {
             if (mode == "new") {
                 // showToast("add");
                 // return;
-                if ($('#password').val() !== "") {
-                    formData.append('password', $('#password').val());
-                }
-                AjaxSubmit(formData, baseUrl + "/teacher-add", "POST");
+              
+                AjaxSubmit(formData, baseUrl + "/homework-add", "POST");
 
             } else if (mode == "update") {
-
-                // formData.append("teacher_id", id);
-                AjaxSubmit(formData, baseUrl + "/teacher-update/" + id, "POST");
+               
+                // formData.append("homework_id", id);
+                AjaxSubmit(formData, baseUrl + "/homework-update/" + id, "POST");
             }
         } else {
             firstInvalidField.focus();
@@ -143,29 +145,31 @@ $(document).ready(function () {
         var isValid = true;
         var errorMessage = "";
 
-        if (fieldId === "name") {
+        if (fieldId === "student_id") {
             if (fieldValue === "") {
                 isValid = false;
-                errorMessage = "Teacher Name is required";
+                errorMessage = "student Name is required";
             }
         }
-        else if (fieldId === "email") {
-            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+       else if (fieldId === "title") {
             if (fieldValue === "") {
                 isValid = false;
-                errorMessage = "Email is required";
-            } else if (!emailRegex.test(fieldValue)) {
-                isValid = false;
-                errorMessage = "Enter a valid Email";
+                errorMessage = "Title is required";
             }
         }
-        else if (fieldId === "password" && mode !='update') {
+        else if (fieldId === "description") {
             if (fieldValue === "") {
                 isValid = false;
-                errorMessage = "Password is required";
+                errorMessage = "Description is required";
             }
         }
-
+        else if (fieldId === "due_date") {
+            if (fieldValue === "") {
+                isValid = false;
+                errorMessage = "Due Date is required";
+            }
+        }
 
 
         if (isValid) {
@@ -195,25 +199,25 @@ $(document).ready(function () {
             },
             success: function (response) {
                 // Handle success
-                if (response.status === "teacher_add_success") {
+                if (response.status === "homework_add_success") {
                     if (response.status_value) {
 
-                        $("#add_teacher").modal("hide");
+                        $("#add_homework").modal("hide");
 
                         showToast(response.message);
-                        // window.location.reload();
-                        Getteacher();
+                        window.location.reload();
+                        // Gethomework();
 
                     } else {
                         showToast(response.message);
                     }
                 }
-                if (response.status === "teacher_update_success") {
+                if (response.status === "homework_update_success") {
                     if (response.status_value) {
-                        $("#add_teacher").modal("hide");
+                        $("#add_homework").modal("hide");
                         showToast(response.message);
                         // refreshDetails();
-                        Getteacher();
+                        Gethomework();
                         // window.location.reload();
 
                     } else {
@@ -242,7 +246,7 @@ $(document).ready(function () {
     $(document).on("click", ".edit-btn", function () {
         var r_index = $(this).attr("id");
         mode = "update";
-        $("#add_teacher").modal("show");
+        $("#add_homework").modal("show");
 
         $("#name").val(coreJSON[r_index].name);
         $("#email").val(coreJSON[r_index].email);
@@ -262,11 +266,11 @@ $(document).ready(function () {
             typeAnimated: true,
             // autoClose: 'cancelAction|8000',
             buttons: {
-                deleteteacher: {
-                    text: "delete teacher",
+                deletehomework: {
+                    text: "delete homework",
                     action: function () {
                         $.ajax({
-                            url: baseUrl + "/teacher-delete",
+                            url: baseUrl + "/homework-delete",
                             method: "POST",
                             headers: {
                                 "X-CSRF-TOKEN": $(

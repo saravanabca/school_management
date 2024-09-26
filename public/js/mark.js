@@ -2,33 +2,33 @@ $(document).ready(function () {
     var mode, id, coreJSON;
     var currentPage = 0;
     // ***************************[Get] ********************************************************************
-    Getteacher();
+    // Getmark();
 
-    function Getteacher() {
+    function Getmark() {
 
         $.ajax({
-            url: baseUrl + "/teacher-get",
+            url: baseUrl + "/mark-get",
             type: "GET",
             dataType: "json",
             success: function (response) {
-                disteacher(response);
-                coreJSON = response.teacherdetails;
+                dismark(response);
+                coreJSON = response.markdetails;
                 console.log(coreJSON);
             },
             error: function (xhr, status, error) {
-                console.error("Error fetching teacher details:", error);
+                console.error("Error fetching mark details:", error);
             },
         });
     }
 
-    function disteacher(data) {
+    function dismark(data) {
         if ($.fn.DataTable.isDataTable("#datatable")) {
             $('#datatable').DataTable().clear().destroy();
         }
 
         var table = $("#datatable").dataTable({
             aaSorting: [],
-            aaData: data.teacherdetails,
+            aaData: data.markdetails,
             aoColumns: [
                 {
                     mData: function (data, type, full, meta) {
@@ -61,21 +61,21 @@ $(document).ready(function () {
 
     function refreshDetails() {
         currentPage = $('#datatable').DataTable().page(); // Capture the current page number
-        $.when(Getteacher()).done(function () {
+        $.when(Getmark()).done(function () {
             var table = $('#datatable').DataTable();
             table.destroy();
-            disteacher(coreJSON);
+            dismark(coreJSON);
         });
     }
 
     // ***************************[Add] ********************************************************************
 
-    $(".add_teacher_btn").click(function () {
+    $(".add_mark_btn").click(function () {
         mode = "new";
-        $("#add_teacher").modal("show");
+        $("#add_mark").modal("show");
     });
 
-    $("#add_teacher").on("show.bs.modal", function () {
+    $("#add_mark").on("show.bs.modal", function () {
         $(this).find("form").trigger("reset");
         $(".form-control").removeClass("danger-border success-border");
         $(".error-message").html("");
@@ -85,13 +85,13 @@ $(document).ready(function () {
 
 
 
-    $("#teacher_add_form input").on("keyup", function () {
+    $("#mark_add_form input").on("keyup", function () {
         validateField($(this));
     });
 
     // Form submission
 
-    $("#teacher_add_form").on("submit", function (e) {
+    $("#mark_add_form").on("submit", function (e) {
         e.preventDefault();
 
         var form = $(this);
@@ -99,20 +99,24 @@ $(document).ready(function () {
         var firstInvalidField = null;
 
         // Validate all fields
-        if (!validateField($("#name"))) {
+        if (!validateField($("#student_id"))) {
             isValid = false;
-            firstInvalidField = $("#name");
-        } else if (!validateField($("#email"))) {
-            isValid = false;
-            if (firstInvalidField === null)
-                firstInvalidField = $("#email");
-        }
-        else if (!validateField($("#password")) && mode != 'update') {
+            firstInvalidField = $("#student_id");
+        } else if (!validateField($("#marks"))) {
             isValid = false;
             if (firstInvalidField === null)
-                firstInvalidField = $("#password");
+                firstInvalidField = $("#marks");
         }
-
+        else if (!validateField($("#subject"))) {
+            isValid = false;
+            if (firstInvalidField === null)
+                firstInvalidField = $("#subject");
+        }
+        else if (!validateField($("#date"))) {
+            isValid = false;
+            if (firstInvalidField === null)
+                firstInvalidField = $("#date");
+        }
 
         if (isValid) {
             var formData = new FormData(this);
@@ -120,15 +124,13 @@ $(document).ready(function () {
             if (mode == "new") {
                 // showToast("add");
                 // return;
-                if ($('#password').val() !== "") {
-                    formData.append('password', $('#password').val());
-                }
-                AjaxSubmit(formData, baseUrl + "/teacher-add", "POST");
+              
+                AjaxSubmit(formData, baseUrl + "/mark-add", "POST");
 
             } else if (mode == "update") {
-
-                // formData.append("teacher_id", id);
-                AjaxSubmit(formData, baseUrl + "/teacher-update/" + id, "POST");
+               
+                // formData.append("mark_id", id);
+                AjaxSubmit(formData, baseUrl + "/mark-update/" + id, "POST");
             }
         } else {
             firstInvalidField.focus();
@@ -143,30 +145,32 @@ $(document).ready(function () {
         var isValid = true;
         var errorMessage = "";
 
-        if (fieldId === "name") {
+        if (fieldId === "student_id") {
             if (fieldValue === "") {
                 isValid = false;
-                errorMessage = "Teacher Name is required";
+                errorMessage = "Student Name is required";
             }
         }
-        else if (fieldId === "email") {
-            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+       else if (fieldId === "marks") {
             if (fieldValue === "") {
                 isValid = false;
-                errorMessage = "Email is required";
-            } else if (!emailRegex.test(fieldValue)) {
-                isValid = false;
-                errorMessage = "Enter a valid Email";
+                errorMessage = "Mark is required";
             }
         }
-        else if (fieldId === "password" && mode !='update') {
+        else if (fieldId === "subject") {
             if (fieldValue === "") {
                 isValid = false;
-                errorMessage = "Password is required";
+                errorMessage = "Subject	is required";
             }
         }
-
-
+        else if (fieldId === "date") {
+            if (fieldValue === "") {
+                isValid = false;
+                errorMessage = "Date is required";
+            }
+        }
+        
 
         if (isValid) {
             field.removeClass("danger-border").addClass("success-border");
@@ -195,25 +199,25 @@ $(document).ready(function () {
             },
             success: function (response) {
                 // Handle success
-                if (response.status === "teacher_add_success") {
+                if (response.status === "mark_add_success") {
                     if (response.status_value) {
 
-                        $("#add_teacher").modal("hide");
+                        $("#add_mark").modal("hide");
 
                         showToast(response.message);
-                        // window.location.reload();
-                        Getteacher();
+                        window.location.reload();
+                        // Getmark();
 
                     } else {
                         showToast(response.message);
                     }
                 }
-                if (response.status === "teacher_update_success") {
+                if (response.status === "mark_update_success") {
                     if (response.status_value) {
-                        $("#add_teacher").modal("hide");
+                        $("#add_mark").modal("hide");
                         showToast(response.message);
                         // refreshDetails();
-                        Getteacher();
+                        Getmark();
                         // window.location.reload();
 
                     } else {
@@ -242,7 +246,7 @@ $(document).ready(function () {
     $(document).on("click", ".edit-btn", function () {
         var r_index = $(this).attr("id");
         mode = "update";
-        $("#add_teacher").modal("show");
+        $("#add_mark").modal("show");
 
         $("#name").val(coreJSON[r_index].name);
         $("#email").val(coreJSON[r_index].email);
@@ -262,11 +266,11 @@ $(document).ready(function () {
             typeAnimated: true,
             // autoClose: 'cancelAction|8000',
             buttons: {
-                deleteteacher: {
-                    text: "delete teacher",
+                deletemark: {
+                    text: "delete mark",
                     action: function () {
                         $.ajax({
-                            url: baseUrl + "/teacher-delete",
+                            url: baseUrl + "/mark-delete",
                             method: "POST",
                             headers: {
                                 "X-CSRF-TOKEN": $(

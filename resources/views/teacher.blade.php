@@ -68,7 +68,7 @@ $title = 'students';
                                 </div>
 
                                 <div class="col col-md-12 mt-4">
-                                    <div class="form-floating text-center w-100">
+                                    <div class="form-floating text-center password_group w-100">
                                         <input type="password" class="form-control" id="password" placeholder=""
                                             name="password">
                                         <label for="password">Password</label>

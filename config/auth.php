@@ -35,12 +35,20 @@ return [
     |
     */
 
-    'guards' => [
-        'web' => [
+        'guards' => [
+            'web' => [
+                'driver' => 'session',
+                'provider' => 'users',
+            ],
+            'teacher' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'teachers',
         ],
-    ],
+        'student' => [
+            'driver' => 'session',
+            'provider' => 'students',
+        ],
+        ],
 
     /*
     |--------------------------------------------------------------------------
@@ -64,11 +72,14 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'teachers' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Teacher::class,
+        ],
+        'students' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Student::class,
+        ],
     ],
 
     /*

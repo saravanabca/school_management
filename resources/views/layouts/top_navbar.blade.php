@@ -21,11 +21,18 @@
  <div class="sidenav">
      <h4 class="text-center text-white">Admin Panel</h4>
      <hr>
-     @if(auth()->check() && auth()->user()->role === 'admin')
-
      <a href="{{url('dashboard')}}">Dashboard</a>
+
+     @if(Auth::guard('web')->check())
+
      <a href="{{url('teacher')}}">Teacher</a>
      <a href="{{url('student')}}">Student</a>
+     @elseif(Auth::guard('teacher')->check())
+     <a href="{{url('student')}}">Student</a>
+     <a href="{{url('homework')}}">Home Work</a>
+     <a href="{{url('mark')}}">Mark</a>
+     @elseif(Auth::guard('student')->check())
+     <a href="{{url('mark')}}">Mark</a>
 
      @endif
 

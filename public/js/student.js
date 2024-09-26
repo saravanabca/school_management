@@ -1,6 +1,6 @@
 $(document).ready(function () {
     var mode, id, coreJSON;
-    var currentPage = 0; 
+    var currentPage = 0;
     // ***************************[Get] ********************************************************************
     Getstudent();
 
@@ -21,79 +21,51 @@ $(document).ready(function () {
         });
     }
 
-        function disstudent(data) {
-            if ($.fn.DataTable.isDataTable("#datatable")) {
-                $('#datatable').DataTable().clear().destroy();
-            }
-        
-            var table = $("#datatable").dataTable({
-                aaSorting: [],
-                aaData: data.studentdetails,
-                aoColumns: [
-                    {
-                        mData: function (data, type, full, meta) {
-                            return data.first_name;
-                        },
-                    },
-                   
-                    {
-                        mData: function (data, type, full, meta) {
-                            return data.mobile;
-                        },
-                    },
-                    {
-                        mData: function (data, type, full, meta) {
-                            return data.email;
-                        },
-                    },
-                    {
-                        mData: function (data, type, full, meta) {
-                            if (data.address.length > 10) {
-                                return '<span data-toggle="tooltip" title="' + data.address + '">' + data.address.substring(0, 10) + '...</span>';
-                            } else {
-                                return data.address;
-                            }
-                        },
-                    },
-                    {
-                        mData: function (data, type, full, meta) {
-                            return data.department ? data.department.name : 'N/A';
-                        },
-                    },
-                    {
-                        mData: function (data, type, full, meta) {
-                            // Conditionally set background color based on status
-                            if (data.status === 1) {
-                                return `<span class="badge bg-success">Active</span>`;
-                            } else {
-                                return `<span class="badge bg-danger">Inactivated</span>`;
-                            }
-                        },
-                    },
-                    {
-                        mData: function (data, type, full, meta) {
-                            return `<button class="edit-btn btn btn-primary" id="${meta.row}">Edit</button>`;
-                        },
-                    },
-                ],
-                drawCallback: function () {
-                    $('[data-toggle="tooltip"]').tooltip();
-                }
-            });
-            
-        
-            $('[data-toggle="tooltip"]').tooltip();
+    function disstudent(data) {
+        if ($.fn.DataTable.isDataTable("#datatable")) {
+            $('#datatable').DataTable().clear().destroy();
         }
-        
 
-    function refreshDetails()
-    {
+        var table = $("#datatable").dataTable({
+            aaSorting: [],
+            aaData: data.studentdetails,
+            aoColumns: [
+                {
+                    mData: function (data, type, full, meta) {
+                        return data.name;
+                    },
+                },
+
+
+                {
+                    mData: function (data, type, full, meta) {
+                        return data.email;
+                    },
+                },
+                {
+                    mData: function (data, type, full, meta) {
+                        return `<button class="edit-btn btn btn-primary" id="${meta.row}">Edit</button> 
+                        <button class="delete-btn" id="${data.id}">Delete</button>`;
+                    },
+                },
+            ],
+            drawCallback: function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+        });
+
+
+        $('[data-toggle="tooltip"]').tooltip();
+    }
+
+
+    function refreshDetails() {
         currentPage = $('#datatable').DataTable().page(); // Capture the current page number
-        $.when(Getstudent()).done(function(){
+        $.when(Getstudent()).done(function () {
             var table = $('#datatable').DataTable();
-            table.destroy();    
-            disstudent(coreJSON);               
-        });     
+            table.destroy();
+            disstudent(coreJSON);
+        });
     }
 
     // ***************************[Add] ********************************************************************
@@ -111,7 +83,7 @@ $(document).ready(function () {
 
     });
 
- 
+
 
     $("#student_add_form input").on("keyup", function () {
         validateField($(this));
@@ -121,43 +93,26 @@ $(document).ready(function () {
 
     $("#student_add_form").on("submit", function (e) {
         e.preventDefault();
-        
+
         var form = $(this);
         var isValid = true;
         var firstInvalidField = null;
 
         // Validate all fields
-        if (!validateField($("#first_name"))) {
+        if (!validateField($("#name"))) {
             isValid = false;
-            firstInvalidField = $("#first_name");
-        } else if (!validateField($("#last_name"))) {
-            isValid = false;
-            if (firstInvalidField === null) firstInvalidField = $("#last_name");
+            firstInvalidField = $("#name");
         } else if (!validateField($("#email"))) {
             isValid = false;
             if (firstInvalidField === null)
                 firstInvalidField = $("#email");
         }
-        else if (!validateField($("#mobile"))) {
+        else if (!validateField($("#password")) && mode != 'update') {
             isValid = false;
             if (firstInvalidField === null)
-                firstInvalidField = $("#mobile");
+                firstInvalidField = $("#password");
         }
-        else if (!validateField($("#address"))) {
-            isValid = false;
-            if (firstInvalidField === null)
-                firstInvalidField = $("#address");
-        }
-        else if (!validateField($("#department_id"))) {
-            isValid = false;
-            if (firstInvalidField === null)
-                firstInvalidField = $("#department_id");
-        }
-        else if (!validateField($("#status"))) {
-            isValid = false;
-            if (firstInvalidField === null)
-                firstInvalidField = $("#status");
-        }
+
 
         if (isValid) {
             var formData = new FormData(this);
@@ -165,12 +120,15 @@ $(document).ready(function () {
             if (mode == "new") {
                 // showToast("add");
                 // return;
+                if ($('#password').val() !== "") {
+                    formData.append('password', $('#password').val());
+                }
                 AjaxSubmit(formData, baseUrl + "/student-add", "POST");
 
             } else if (mode == "update") {
-              
+
                 // formData.append("student_id", id);
-                AjaxSubmit(formData, baseUrl + "/student-update/"+ id, "POST");
+                AjaxSubmit(formData, baseUrl + "/student-update/" + id, "POST");
             }
         } else {
             firstInvalidField.focus();
@@ -185,18 +143,12 @@ $(document).ready(function () {
         var isValid = true;
         var errorMessage = "";
 
-        if (fieldId === "first_name") {
+        if (fieldId === "name") {
             if (fieldValue === "") {
                 isValid = false;
-                errorMessage = "First Name is required";
+                errorMessage = "student Name is required";
             }
-        } 
-       else if (fieldId === "last_name") {
-            if (fieldValue === "") {
-                isValid = false;
-                errorMessage = "Last Name is required";
-            }
-        } 
+        }
         else if (fieldId === "email") {
             var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (fieldValue === "") {
@@ -206,34 +158,14 @@ $(document).ready(function () {
                 isValid = false;
                 errorMessage = "Enter a valid Email";
             }
-        } else if (fieldId === "mobile") {
-            var mobileRegex = /^[0-9]{10}$/;
+        }
+        else if (fieldId === "password" && mode !='update') {
             if (fieldValue === "") {
                 isValid = false;
-                errorMessage = "Mobile Number is required";
-            } else if (!mobileRegex.test(fieldValue)) {
-                isValid = false;
-                errorMessage = "Enter a valid Mobile Number";
+                errorMessage = "Password is required";
             }
         }
-        else if (fieldId === "address") {
-            if (fieldValue === "") {
-                isValid = false;
-                errorMessage = "Address is required";
-            }
-        }
-        else if (fieldId === "department_id") {
-            if (fieldValue === "") {
-                isValid = false;
-                errorMessage = "Department is required";
-            }
-        }
-        else if (fieldId === "status") {
-            if (fieldValue === "") {
-                isValid = false;
-                errorMessage = "Status is required";
-            }
-        }
+
 
 
         if (isValid) {
@@ -265,13 +197,13 @@ $(document).ready(function () {
                 // Handle success
                 if (response.status === "student_add_success") {
                     if (response.status_value) {
-                        
+
                         $("#add_student").modal("hide");
 
                         showToast(response.message);
                         // window.location.reload();
                         Getstudent();
-                     
+
                     } else {
                         showToast(response.message);
                     }
@@ -294,9 +226,9 @@ $(document).ready(function () {
                 if (xhr.status === 422) {
                     var errors = xhr.responseJSON.errors;
                     $.each(errors, function (key, message) {
-                        showToast(message); 
+                        showToast(message);
                     });
-                } else if (xhr.status === 500) { 
+                } else if (xhr.status === 500) {
                     alert("An internal server error occurred. Please try again later.");
                 } else {
                     alert("An error occurred: " + xhr.status + " - " + error);
@@ -311,17 +243,10 @@ $(document).ready(function () {
         var r_index = $(this).attr("id");
         mode = "update";
         $("#add_student").modal("show");
-        
-    // Assuming coreJSON[r_index] holds the selected student record
-$("#first_name").val(coreJSON[r_index].first_name);
-$("#last_name").val(coreJSON[r_index].last_name);
-$("#mobile").val(coreJSON[r_index].mobile);
-$("#email").val(coreJSON[r_index].email);
-$("#address").val(coreJSON[r_index].address);
-$("#department_id").val(coreJSON[r_index].department_id); // Assuming the dropdown has department_id as value
-$("#status").val(coreJSON[r_index].status); // Assuming the status is a select or input field
 
-
+        $("#name").val(coreJSON[r_index].name);
+        $("#email").val(coreJSON[r_index].email);
+        $(".password_group").hide();
         console.log(coreJSON);
         id = coreJSON[r_index].id;
     });
@@ -351,8 +276,8 @@ $("#status").val(coreJSON[r_index].status); // Assuming the status is a select o
                             data: { selectedId: selectedId }, // Send data as an object
                             success: function (data) {
                                 if (data.status) {
-                                   showToast(data.message);
-                                   location.reload();
+                                    showToast(data.message);
+                                    location.reload();
                                 } else {
                                     showToast(data.message);
                                 }
@@ -371,6 +296,6 @@ $("#status").val(coreJSON[r_index].status); // Assuming the status is a select o
         });
     });
 
-    
-    
+
+
 });

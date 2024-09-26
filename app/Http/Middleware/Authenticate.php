@@ -23,12 +23,13 @@ class Authenticate extends Middleware
         }
     }
 
-    public function handle($request, Closure $next, ...$guards)
-{
-    if ($this->auth->guard('web')->check()) {
+    public function handle(Request $request, Closure $next,$guard)
+    {
+        // If the user is not authenticated, redirect them to the login page
+        if (!Auth::guard($guard)->check()) {
+            return redirect('/'); // Adjust to your login route
+        }
+
         return $next($request);
     }
-
-    return redirect('/');
-}
 }
